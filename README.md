@@ -37,4 +37,4 @@ We were able to predict pulsars accurately and with minimal false negatives and 
 
 The Google Slides presentation can be found [here](https://docs.google.com/presentation/d/18mKm0ecHR6tM23GHu8oQDrhBvg1xl2E08E2PzdNKfBk/edit?usp=sharing).
 
-The Medium article can be found [here]()
+The Medium article can be found [here](https://medium.com/@andrew.j.bergman/predicting-pulsar-stars-996e22440cf7).
