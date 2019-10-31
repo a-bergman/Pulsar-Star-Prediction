@@ -27,7 +27,7 @@ We decided to use only one type of model: a feed forward neural network.  We cho
 
 -----
 
-After running the models on each sub-set, we were able to determine our best model as the neural network with the interaction features.  The scores were very similar, but we placed a lot of emphasis on the ROC-AUC score because it indicates the degree of overlap between the two classes: our best model had a score of 0.91437, which indicates our classes are very distinct.  The other metric scores were high and there was negligible overfitting as well.
+After running the models on each sub-set, we were able to determine our best model as the neural network with the interaction features.  The scores were very similar, but we placed a lot of emphasis on the ROC-AUC score because it indicates the degree of overlap between the two classes: our best model had a score of 0.91193, which indicates our classes are very distinct.  The other metric scores were high and there was negligible overfitting as well.
 
 We were able to predict pulsars accurately and with minimal false negatives and have confidence in our model's performance.  That being said, we do believe that there is still room for improvement.  We would like to experiment with different regularization techniques, such as dropout, and either down-sampling the majority class or up-sampling the minority class.  We feel that further experimentation with the interaction columns will improve performance as well.
 
