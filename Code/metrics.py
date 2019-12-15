@@ -1,7 +1,7 @@
 # Imports
 
 import pandas        as pd
-from sklearn.metrics import confusion_matrix, r2_score, balanced_accuracy_score
+from sklearn.metrics import confusion_matrix, r2_score, balanced_accuracy_score, accuracy_score
 from sklearn.metrics import recall_score, f1_score, roc_auc_score, matthews_corrcoef
 
 """
@@ -119,6 +119,17 @@ def ternary_specificity(y, y_predicted):
     s3 = cm[2,2] / (cm[0,2] + cm[1,2] + cm[2,2])
     specificity = (s1 + s2 + s3) / 3
     return specificity
+
+def binary_classification_summary(y, y_predicted):
+    acc = accuracy_score(y, y_predicted)
+    sen = recall_score(y, y_predicted)
+    spe = specificity(y, y_predicted)
+    auc = roc_auc_score(y, y_predicted)
+    mcc = matthews_corrcoef(y, y_predicted)
+    classification_summary = pd.DataFrame([acc, sen, spe, auc, mcc], 
+                                          index = ["Accuracy", "Sensitivity", "Specificity", "AUROC", "Matthew Corr. Coef."], 
+                                          columns = ["Score"])
+    return classification_summary
 
 def ternary_classification_summary(y, y_predicted):
     bal_acc = balanced_accuracy_score(y, y_predicted)
