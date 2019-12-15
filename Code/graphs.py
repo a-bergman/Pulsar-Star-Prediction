@@ -380,7 +380,6 @@ def barplot(df, x, y, title, label, ylabel, dim, orient = "v", ci = False, hue =
     Description:
     ------------
     Plots a single bar chart for a categorical column in a Pandas dataframe and allows for greater appearance control.
-    This type of chart takes a categorical variable and returns the mean of a corresponding numeric variable.
 
     Returns:
     --------
