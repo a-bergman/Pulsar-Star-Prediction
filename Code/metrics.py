@@ -94,7 +94,7 @@ def specificity(y, y_predicted):
     The specificity score: a floating point number between 0 and 1
     """
     cm = confusion_matrix(y, y_predicted)  
-    specificity = cm[0,0] / (cm[0,0] + cm[0,1])
+    specificity = cm[0,0] / (cm[0,0] + cm[1,0])
     return specificity
 
 def ternary_specificity(y, y_predicted):
