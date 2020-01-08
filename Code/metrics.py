@@ -1,8 +1,12 @@
 # Imports
 
 import pandas        as pd
-from sklearn.metrics import confusion_matrix, r2_score, balanced_accuracy_score, accuracy_score
-from sklearn.metrics import recall_score, f1_score, roc_auc_score, matthews_corrcoef
+from math            import sqrt
+from sklearn.metrics import confusion_matrix, r2_score
+from sklearn.metrics import f1_score, roc_auc_score, balanced_accuracy_score
+from sklearn.metrics import matthews_corrcoef, jaccard_score, accuracy_score
+from sklearn.metrics import mean_squared_error, mean_absolute_error, recall_score
+from scipy.stats     import pointbiserialr
 
 """
 The docstrings for each graph contain the following:
@@ -27,7 +31,6 @@ either to add a metric that does not exist or to improve something does already 
     if __name__ == "__main__":
         main()
 """
-
 
 # Regression Metrics
 
@@ -54,16 +57,61 @@ def r2_adj(X, y, y_predicted):
     r2_adj = 1 - quotient
     return r2_adj
 
+def regression_summary(X, y, y_predicted):
+    """
+    Parameters:
+    -----------
+    X           : the X variables from the data : : :
+    y           : the true y values             : : :
+    y_predicted : the predicted y values        : : :
+
+    Description:
+    ------------
+    Evaluates the regression model on four metrics & prints the results in a dataframe
+
+    Returns:
+    --------
+    A dataframe containing the RMSE, MAE, R^2, & Adjusted R^2 for a regression model
+    """
+    rmse = sqrt(mean_squared_error(y, y_predicted))
+    mae  = mean_absolute_error(y, y_predicted)
+    r2   = r2_score(y, y_predicted)
+    adjr2 = r2_adj(X, y, y_predicted)
+    regression_summary = pd.DataFrame([rmse, mae, r2], index = ["RMSE", "MAE", "R2"], columns = ["Score"])
+    return regression_summary
+
+def ss_regression_summary(y, y_predicted):
+    """
+    Parameters:
+    -----------
+    X           : the X variables from the data : : :
+    y           : the true y values             : : :
+    y_predicted : the predicted y values        : : :
+
+    Description:
+    ------------
+    Evaluates the regression model on three metrics & prints the results in a dataframe
+
+    Returns:
+    --------
+    A dataframe containing the RMSE, MAE, & R^2 for a regression model whose X variables have been scaled
+    """
+    rmse = sqrt(mean_squared_error(y, y_predicted))
+    mae  = mean_absolute_error(y, y_predicted)
+    r2   = r2_score(y, y_predicted)
+    regression_summary = pd.DataFrame([rmse, mae, r2], index = ["RMSE", "MAE", "R2"], columns = ["Score"])
+    return regression_summary
+
 # Classification Metrics
 
 def confusion_matrix_dataframe(y, y_predicted, columns, index):
     """
     Parameters:
     -----------
-    y           : the true values       :     :
-    y_predicted : the model predictions :     :
-    columns     : column labels         : str : [0, 1, etc.]
-    index       : row labels            : str : [0, 1, etc.]
+    y           : the true values       :     :              :
+    y_predicted : the model predictions :     :              :
+    columns     : column labels         : str : [0, 1, etc.] :
+    index       : row labels            : str : [0, 1, etc.] :
     
     Description:
     ------------
@@ -74,28 +122,29 @@ def confusion_matrix_dataframe(y, y_predicted, columns, index):
     --------
     A Pandas dataframe of the sklearn's confusion_matrix.
     """
-    cm     = confusion_matrix(y, y_predicted)
+    cm = confusion_matrix(y, y_predicted)
     matrix = pd.DataFrame(cm, columns = columns, index = index)
     return matrix
 
 def specificity(y, y_predicted):
-    """
-    Parameters:
-    -----------
-    y           : the true values       : :
-    y_predicted : the model predictions : :
+    tn, fp, tp, fn = confusion_matrix(y, y_predicted).ravel()
+    return tn / (tn + fp)
 
-    Description:
-    ------------
-    Calculates the percentage of negatives that are correctly classified as being negative. A confusion matrix generated and is the score (TN / TN + FP) is calculated.
+def negative_predictive_value(y, y_predicted):
+    tn, fp, tp, fn = confusion_matrix(y, y_predicted)
+    return tn / (tn + fn)
 
-    Returns:
-    --------
-    The specificity score: a floating point number between 0 and 1
-    """
-    cm = confusion_matrix(y, y_predicted)  
-    specificity = cm[0,0] / (cm[0,0] + cm[1,0])
-    return specificity
+
+def binary_classification_summary(y, y_predicted):
+    acc = accuracy_score(y, y_predicted)
+    sen = recall_score(y, y_predicted)
+    spe = specificity(y, y_predicted)
+    mcc = matthews_corrcoef(y, y_predicted)
+    auc = roc_auc_score(y, y_predicted)
+    binary_classification_summary = pd.DataFrame([acc, sen, spe, mcc, auc], 
+                                                 index = ["Accuracy", "Sensitivity", "Specificity", "Matthews Corr. Coef.", "AUROC"], 
+                                                 columns = ["Scores"])
+    return binary_classification_summary
 
 def ternary_specificity(y, y_predicted):
     """
@@ -117,24 +166,21 @@ def ternary_specificity(y, y_predicted):
     s1 = cm[0,0] / (cm[0,0] + cm[0,1] + cm[0,2])
     s2 = cm[1,1] / (cm[0,1] + cm[1,1] + cm[1,2])
     s3 = cm[2,2] / (cm[0,2] + cm[1,2] + cm[2,2])
-    specificity = (s1 + s2 + s3) / 3
-    return specificity
-
-def binary_classification_summary(y, y_predicted):
-    acc = accuracy_score(y, y_predicted)
-    sen = recall_score(y, y_predicted)
-    spe = specificity(y, y_predicted)
-    auc = roc_auc_score(y, y_predicted)
-    mcc = matthews_corrcoef(y, y_predicted)
-    classification_summary = pd.DataFrame([acc, sen, spe, auc, mcc], 
-                                          index = ["Accuracy", "Sensitivity", "Specificity", "AUROC", "Matthew Corr. Coef."], 
-                                          columns = ["Score"])
-    return classification_summary
+    return (s1 + s2 + s3) / 3
 
 def ternary_classification_summary(y, y_predicted):
     bal_acc = balanced_accuracy_score(y, y_predicted)
-    recall  = recall_score(y, y_predicted, average = "macro")
     spec    = ternary_specificity(y, y_predicted)
     mcc     = matthews_corrcoef(y, y_predicted)
-    classification_summary = pd.DataFrame([bal_acc, recall, spec, mcc], index = ["Balanced Accuracy", "Sensitivity", "Specificity", "Matthew Corr. Coef."]).T
-    return classification_summary
+    jcs     = jaccard_score(y, y_predicted, average = "macro")
+    classification_summary = pd.DataFrame([bal_acc, spec, mcc, jcs], 
+                                          index = ["Balanced Accuracy", "Specificity", "Matthews Corr. Coef.", "Jaccard Score"], 
+                                          columns = ["Scores"])
+    return ternary_classification_summary
+
+
+# Statistics
+
+def point_biserial_r(x, y):
+    """
+    """
